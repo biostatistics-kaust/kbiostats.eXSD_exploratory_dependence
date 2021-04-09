@@ -1,0 +1,43 @@
+Package: eXSD
+Title: eXSD. Spectral Dependencies Explorer in Time Series
+Version: 0.9
+Authors@R: 
+    c(person(given = "Pinto",
+             family = "Marco",
+             role = c("aut", "cre"),
+             email = "pinto.marco@live.com"),
+      person(given = "Ombao",
+             family = "Hernando",
+             role = "aut",
+             email = "hernando.ombao@kaust.edu.sa"))
+Description: DEXplorer includes a series of time-series dependence metrics that can be also viewed in a graphical user interface.
+License: MIT/GPL
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.0.2
+RdMacros:
+    mathjaxr
+Imports:
+    shinydashboard,
+    mathjaxr
+Depends:
+    vars,
+    latex2exp,
+    ggplot2,
+    cowplot,
+    gridExtra,
+    ggthemes,
+    mathjaxr,
+    extrafont,
+    seewave,
+    shinydashboard,
+    RColorBrewer,
+    reshape2,
+    ggbiplot,
+    igraph,
+    glmnet,
+    BigVAR,
+    shinyWidgets,
+    gdpc,
+    signal
+
