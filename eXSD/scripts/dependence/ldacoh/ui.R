@@ -1,5 +1,7 @@
 #' @export
-lagged_dualfreq_coherence_controller <- function(sampling_frequency=200) {
+lagged_dualfreq_coherence_controller <- function(dataparameters) {
+  fs <- dataparameters$fs
+  sampling_frequency <- dataparameters$fs
   mat2df <- function(m, preffix="ch.", m_colnames=NULL){
       r <- nrow(m)
       c <- ncol(m)
@@ -43,6 +45,7 @@ lagged_dualfreq_coherence_controller <- function(sampling_frequency=200) {
       melt(df, id="w")
   }
 
+  networkWidget <- basicNetworkWidget(preffix="PCoh")
 
   server <- function(id, dataset) {
       ns <- NS(id)
@@ -118,12 +121,17 @@ lagged_dualfreq_coherence_controller <- function(sampling_frequency=200) {
                               axis.text.x = element_text(angle = 90))
               }, res=250, width = 2.5*700, height = 2.5*500)
               
-              output$tsCohGraph <- renderPlot({
-                  G <- mat2graph(data.ldac()$coh, m_colnames=colnames(dataset()))
-                  #plot(G, layout=layout_in_circle, vertex.size=40)
-                  plot(G, layout=layout.fruchterman.reingold, vertex.size=40, edge.arrow.size=1)
-              }, res=250, width = 3.5*700, height = 3.5*500)
+              #utput$tsCohGraph <- renderPlot({
+              #    G <- mat2graph(data.ldac()$coh, m_colnames=colnames(dataset()))
+              #    #plot(G, layout=layout_in_circle, vertex.size=40)
+              #    plot(G, layout=layout.fruchterman.reingold, vertex.size=40, edge.arrow.size=1)
+              #}, res=250, width = 3.5*700, height = 3.5*500)
 
+              networkWidget$server(input, output, getMatrixFunctor=(function(){
+                Q <- data.ldac()$coh
+                colnames(Q) <- colnames(dataset())
+                Q
+              }), is_directed=FALSE)
           }
       )
   }
@@ -160,7 +168,8 @@ lagged_dualfreq_coherence_controller <- function(sampling_frequency=200) {
               box(
                   title = "Coherence graph", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsCohGraph"))#,
+                  #plotOutput(ns("tsCohGraph"))#,
+                  networkWidget$client(ns)
                   #helpText("Edges with magnitudes in the upper quartile")
               )
           )
