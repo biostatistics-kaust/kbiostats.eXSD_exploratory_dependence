@@ -1,5 +1,6 @@
 #' @export
-partial_directed_coherence_controller <- function() {
+partial_directed_coherence_controller <- function(dataparameters) {
+  fs <- dataparameters$fs
   ts2df_dualcol <- function(m, i, j){
       df <- list(
           x=1:nrow(m)
@@ -53,6 +54,7 @@ partial_directed_coherence_controller <- function() {
       G
   }
 
+  networkWidget <- basicNetworkWidget(preffix="PCoh")
 
   server <- function(id, dataset) {
       ns <- NS(id)
@@ -92,7 +94,7 @@ partial_directed_coherence_controller <- function() {
                   j <- as.integer(input$txtDst)
                   ggplot(
                       data.frame(
-                          frequencies=metric()$freqs,
+                          frequencies=metric()$freqs * fs,
                           partial_directed_coherence=get_marginal_coh(metric()$coh, i, j)
                       ),
                       aes(
@@ -104,7 +106,7 @@ partial_directed_coherence_controller <- function() {
               }, res=250, width = 2.5*750, height = 2.5*300)
 
               output$tsCohMatrix <- renderPlot({
-                  idx <- as.integer(ceiling(input$txtFrequency *number_freq_points)) + 1
+                  idx <- as.integer(ceiling(input$txtFrequency / fs * number_freq_points)) + 1
                   data <- mat2df(metric()$coh[[idx]], m_colnames=colnames(dataset()))
                   ggplot(
                       data, 
@@ -122,29 +124,35 @@ partial_directed_coherence_controller <- function() {
                               axis.text.x = element_text(angle = 90))
               }, res=250, width = 2.5*700, height = 2.5*500)
 
-              output$tsPlot <- renderPlot({
-                  i <- as.integer(input$txtSrc)
-                  j <- as.integer(input$txtDst)
-                  df <- ts2df_dualcol(dataset(), i, j)
-                  ggplot(
-                      df,
-                      aes(
-                          x=x, 
-                          y=value,
-                          colour=variable,
-                          group=variable
-                      )
-                  ) + geom_line(                    
-                  ) +  facet_wrap(~variable, ncol=2)
-              }, res=250, width = 2.5*750, height = 2.5*300)
+              #output$tsPlot <- renderPlot({
+              #    i <- as.integer(input$txtSrc)
+              #    j <- as.integer(input$txtDst)
+              #    df <- ts2df_dualcol(dataset(), i, j)
+              #    ggplot(
+              #        df,
+              #        aes(
+              #            x=x, 
+               #           y=value,
+              #            colour=variable,
+              #            group=variable
+              #        )
+              #    ) + geom_line(                    
+              #    ) +  facet_wrap(~variable, ncol=2)
+              #}, res=250, width = 2.5*750, height = 2.5*300)
               
-              output$tsCohGraph <- renderPlot({
-                  idx <- as.integer(ceiling(input$txtFrequencyGraph *number_freq_points)) + 1
-                  G <- mat2graph(metric()$coh[[idx]], m_colnames=colnames(dataset()))
-                  #plot(G, layout=layout_in_circle, vertex.size=40)
-                  plot(G, layout=layout.fruchterman.reingold, vertex.size=40, edge.arrow.size=1)
-              }, res=250, width = 3.5*700, height = 3.5*500)
+              #output$tsCohGraph <- renderPlot({
+              #    idx <- as.integer(ceiling(input$txtFrequencyGraph / fs * number_freq_points)) + 1
+              #    G <- mat2graph(metric()$coh[[idx]], m_colnames=colnames(dataset()))
+              #    #plot(G, layout=layout_in_circle, vertex.size=40)
+              #    plot(G, layout=layout.fruchterman.reingold, vertex.size=40, edge.arrow.size=1)
+              #}, res=250, width = 3.5*700, height = 3.5*500)
 
+              networkWidget$server(input, output, getMatrixFunctor=(function(){
+                idx <- as.integer(ceiling(input$txtFrequencyGraph / fs * number_freq_points)) + 1
+                Q <- metric()$coh[[idx]]
+                colnames(Q) <- colnames(dataset())
+                Q
+              }))
           }
       )
   }
@@ -188,20 +196,21 @@ partial_directed_coherence_controller <- function() {
                   #sliderInput(ns("txtDst"), "Output channel:", 1, 10, 0, step=1),
                   #textInput(ns("text"), "Text input:")
                   plotOutput(ns("tsCoh")),
-                  helpText("Channels:"),
-                  plotOutput(ns("tsPlot")),
+                  #helpText("Channels:"),
+                  #plotOutput(ns("tsPlot")),
               ),
               box(
                   title = "PDC matrix", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  sliderInput(ns("txtFrequency"), "Normalized frequency:", 0, 0.5, 0, step=0.01),
+                  sliderInput(ns("txtFrequency"), "Frequency:", 0, 0.5*fs, 0, step=0.01),
                   plotOutput(ns("tsCohMatrix"))
               ),
               box(
-                  title = "Coherence graph", status = "primary", solidHeader = TRUE,
+                  title = "PDC graph", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  sliderInput(ns("txtFrequencyGraph"), "Normalized frequency:", 0, 0.5, 0, step=0.01),
-                  plotOutput(ns("tsCohGraph"))#,
+                  sliderInput(ns("txtFrequencyGraph"), "Frequency:", 0, 0.5*fs, 0, step=0.01),
+                  #plotOutput(ns("tsCohGraph"))#,
+                  networkWidget$client(ns)
                   #helpText("Edges with magnitudes in the upper quartile")
               )
           )

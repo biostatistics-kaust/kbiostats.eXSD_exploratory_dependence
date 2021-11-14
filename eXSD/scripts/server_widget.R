@@ -1,6 +1,6 @@
 #' @export
-server_widget <- function(datasources) {
-  infoMethods <- collect_methods()
+server_widget <- function(datasources, dataparameters) {
+  infoMethods <- collect_methods(dataparameters)
   server <- shinyServer(function(input, output) {
    random_data <- matrix(rnorm(1000*6), ncol=6, nrow=1000)
    random_data <- as.data.frame(random_data)

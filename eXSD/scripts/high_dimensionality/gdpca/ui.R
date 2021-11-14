@@ -1,5 +1,6 @@
 #' @export
-generalized_dynamic_pca_controller <- function() {
+generalized_dynamic_pca_controller <- function(dataparameters) {
+  fs <- dataparameters$fs
   ts2df <- function(m, preffix="ch"){
       df <- list(
           x=1:nrow(m)

@@ -1,5 +1,6 @@
 #' @export
-spectral_pca_controller <- function() {
+spectral_pca_controller <- function(dataparameters) {
+  fs <- dataparameters$fs
   ts2df <- function(m, preffix="ch"){
       df <- list(
           x=1:nrow(m)
@@ -12,16 +13,16 @@ spectral_pca_controller <- function() {
       melt(df, id="x")
   }
 
-  spec2df <- function(m, preffix="ch", col="spectrum"){
+  spec2df <- function(m, fs, preffix="ch", col="spectrum"){
       df <- list(
-          w=m$freqs
+          Frequency=m$freqs * fs
       )
       m_names <- if(!is.null(colnames(m[[col]]))) paste0("ts.", colnames(m[[col]])) else paste0(preffix, 1:ncol(m[[col]]))
       for (i in 1:ncol(m[[col]])) {
          df[[m_names[i]]] <- m[[col]][, i]
       }
       df <- as.data.frame(df)
-      melt(df, id="w")
+      melt(df, id="Frequency" , value.name="Spectrum")
   }
 
 
@@ -57,10 +58,10 @@ spectral_pca_controller <- function() {
               
               output$tsSpectrum <- renderPlot({
                   ggplot(
-                      spec2df(data.pca(), preffix="SPEC", col="spectra"),
+                      spec2df(data.pca(), fs, preffix="SPEC", col="spectra"),
                       aes(
-                          x=w, 
-                          y=value,
+                          x=Frequency, 
+                          y=Spectrum,
                           colour=variable,
                           group=variable
                       )
@@ -71,10 +72,10 @@ spectral_pca_controller <- function() {
               
               output$tsPCA <- renderPlot({
                   ggplot(
-                      spec2df(data.pca(), preffix="PC", col="PCs"),
+                      spec2df(data.pca(), fs, preffix="PC", col="PCs"),
                       aes(
-                          x=w, 
-                          y=value,
+                          x=Frequency, 
+                          y=Spectrum,
                           colour=variable,
                           group=variable
                       )
