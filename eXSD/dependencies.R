@@ -9,3 +9,7 @@ install.packages(c(
     "shiny", "shinyWidgets", "shinydashboard", "shinyjs", 
     "vars"
 ))
+
+remotes::install_github("r-lib/usethis")
+remotes::install_github("r-lib/pkgdown")
+remotes::install_github("hafen/rbokeh")
