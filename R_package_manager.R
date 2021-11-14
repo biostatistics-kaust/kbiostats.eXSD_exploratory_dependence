@@ -17,17 +17,20 @@ create_text_file <- function(packageDir, dirpath, filename, fileContent) {
 
 # Package checking
 check_package <-  function(package_name, github_repo=NULL) {
-  if (!require(package_name, character.only = TRUE)) {
+  #if (!require(package_name, character.only = TRUE)) {
+  if (!suppressMessages(suppressWarnings(require(package_name, character.only = TRUE)))) {
     if(is.null(github_repo)){
       install.packages(package_name, dependencies=TRUE)
     }else{
       remotes::install_github(github_repo, dependencies=TRUE)
     }
-    library(package_name, character.only=TRUE)
+    #library(package_name, character.only=TRUE)
+    suppressMessages(suppressWarnings(library(package_name, character.only=TRUE)))
   }
 }
 check_minimal_packages <- function(){
   check_package("devtools")
+  check_package("pkgdown", github_repo="r-lib/usethis")
   check_package("remotes")
   check_package("roxygen2")
   check_package("mathjaxr", github_repo="wviechtb/mathjaxr")
@@ -36,6 +39,8 @@ check_minimal_packages <- function(){
   check_package("shiny", github_repo="rstudio/shiny")
   check_package("stringr")
   check_package("zip")
+  check_package("pkgdown", github_repo="r-lib/pkgdown")
+  check_package("rbokeh", github_repo="hafen/rbokeh")
 }
 
 create_default_package_structure <- function(packageDir, packageName) {
@@ -146,11 +151,71 @@ cat_function <- function(love=TRUE) {
   close(fp)
 }
 
+# https://www.rdocumentation.org/search?q=write_over
+
+#' Use pkgdown
+#' Modified from usethis::use_pkgdown
+#'
+#' @description
+#' [pkgdown](https://pkgdown.r-lib.org) makes it easy to turn your package into
+#' a beautiful website. usethis provides two functions help you use pkgdown:
+#'
+#' * `use_pkgdown()`: creates a pkgdown config file, adds relevant files or
+#'   directories to `.Rbuildignore` and `.gitignore`, and builds favicons if
+#'   your package has a logo.
+#'
+#' * `use_pkgdown_github_pages()`: implements the GitHub setup needed to
+#'   automatically publish your pkgdown site to GitHub pages:
+#'
+#'   - [use_github_pages()] prepares to publish the pkgdown site from the
+#'     `github-pages` branch
+#'   - [`use_github_action("pkgdown")`][use_github_action()] configures a
+#'     GitHub Action to automatically build the pkgdown site and deploy it via
+#'     GitHub Pages
+#'   - The pkgdown site's URL is added to the pkgdown configuration file,
+#'     to the URL field of DESCRIPTION, and to the GitHub repo.
+#'
+#' `use_pkgdown_travis()` is deprecated; we no longer recommend that you use
+#' Travis-CI.
+#'
+#' @seealso <https://pkgdown.r-lib.org/articles/pkgdown.html#configuration>
+#' @param config_file Path to the pkgdown yaml config file
+#' @param destdir Target directory for pkgdown docs
+use_pkgdown <- function(config_file = "_pkgdown.yml", destdir = "docs") {
+  has_logo <- function() {
+    fs::file_exists(proj_path("man", "figures", "logo.png")) ||
+      fs::file_exists(proj_path("man", "figures", "logo.svg"))
+  }
+  #
+  usethis::use_build_ignore(c(config_file, destdir))
+  usethis::use_build_ignore("pkgdown")
+  usethis::use_git_ignore(destdir)
+
+  if (has_logo()) {
+    #build_favicons(overwrite=TRUE)
+    #build_favicons(overwrite=FALSE)
+  }
+
+  config <- usethis::proj_path(config_file)
+  if (!base::identical(destdir, "docs")) {
+    usethis::write_over(config, paste("destination:", destdir))
+  }
+  usethis::edit_file(config)
+
+  base::invisible(TRUE)
+}
+
 build_package <- function(){
-  devtools::document(roclets = c('rd', 'collate', 'namespace'))
-  devtools::build(quiet=TRUE)
+  use_pkgdown(config_file = "_pkgdown.yml", destdir = "docs")
+  pkgdown::clean_site()
+  ####devtools::document(roclets = c('rd', 'collate', 'namespace'), quiet=TRUE)
+  suppressMessages(suppressWarnings(devtools::document(roclets = c('rd', 'collate', 'namespace'), quiet=TRUE)))
+  pkgdown::build_site(pkg=".", examples=FALSE, devel=TRUE, lazy=TRUE)
+  ####devtools::build(quiet=TRUE)
   #devtools::install(quiet=TRUE, upgrade="never")
-  devtools::install(quiet=TRUE, upgrade="never", dependencies=FALSE)
+  ####devtools::install(quiet=TRUE, upgrade="never", dependencies=FALSE)
+  suppressMessages(suppressWarnings(devtools::build(quiet=TRUE)))
+  suppressMessages(suppressWarnings(devtools::install(quiet=TRUE, upgrade="never", dependencies=FALSE)))
 }
 
 # By default, ALL files in an R package
@@ -202,6 +267,7 @@ manage_package <- function(packageName){
     setwd(startDirectory)
   })
 }
+
 
 manage_package(packageName="eXSD")
 
