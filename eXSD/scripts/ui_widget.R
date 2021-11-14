@@ -1,12 +1,12 @@
 
 #' @export
-ui_widget <- function(datasources, labels) {
+ui_widget <- function(datasources, labels, dataparameters) {
   stopifnot(length(datasources) == length(labels))
   stopifnot(all(names(datasources) == names(labels)))
   codes <- names(datasources)
   choiceNames <- unlist(labels)
   names(choiceNames) <- NULL
-  infoMethods <- collect_methods()
+  infoMethods <- collect_methods(dataparameters)
   datasources_widget <- radioButtons(
      "chkDataSource",
      NULL,
@@ -21,13 +21,14 @@ ui_widget <- function(datasources, labels) {
   body <- dashboardBody(
     withMathJax(),
     tags$head(
-      shiny::includeCSS(system.file("www/custom.css", package="DEXplorer")),
-      shiny::includeScript(system.file("www/custom.js", package="DEXplorer"))
+      shiny::includeCSS(system.file("www/custom.css", package="eXSD")),
+      shiny::includeScript(system.file("www/custom.js", package="eXSD")),
+      tags$head(tags$link(rel="shortcut icon", href=system.file("www/favicon.ico", package="eXSD")))
     ),
     methodToTabItems(infoMethods, startTabs),
     tags$div(class="app-footer",
       span("XAD :: Exploratory Analysis of Dependency in Time Series."), 
-      a(href="http://doi.org/0000.0000/0000.0000", "doi:0000.0000/0000.0000")
+      a(href="https://arxiv.org/abs/2103.17240", "arxiv:2103.17240")
     )
   )
   ui <- dashboardPage(
@@ -36,7 +37,7 @@ ui_widget <- function(datasources, labels) {
       title = "Dependency measures in time series"
     ),
     dashboardSidebar(
-      sidebarMenu(menuItem("Main panel", tabName = "main", icon = icon("dot-circle-o"))),
+      sidebarMenu(menuItem("Main panel", tabName = "main", icon = shiny::icon("dot-circle-o"))),
       sidebarLabelItem(class = "ui-label", label = "Datasets"),
       datasources_widget, 
       sidebarLabelItem(class = "ui-label", label = "Methods"),
