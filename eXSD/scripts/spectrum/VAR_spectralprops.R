@@ -1,7 +1,8 @@
 estimate_coherence <- function(model, w){
 	S <- estimate_spectrum(model, w)
-    C <- cov2cor(abs(S))
-    C
+  C <- cov2cor(abs(S))
+  C <- matrix(pmax(-1, pmin(C, 1)), nrow=nrow(C)) #TODO
+  C
 }
 
 coherence_freqset <- function(model, freqs=(0:100)/200) {
