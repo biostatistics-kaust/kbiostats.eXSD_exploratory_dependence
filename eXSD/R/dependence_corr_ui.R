@@ -1,5 +1,5 @@
 #' @export
-correlation_controller <- function() {
+correlation_controller <- function(fs) {
 
   ts2df <- function(m, preffix="ch."){
       df <- list(
@@ -45,6 +45,8 @@ correlation_controller <- function() {
       G
   }
 
+  networkWidget <- basicNetworkWidget(preffix="PCoh")
+
   server <- function(id, dataset) {
       shiny::moduleServer(
           id,
@@ -77,11 +79,17 @@ correlation_controller <- function() {
                               axis.text.x = element_text(angle = 90))
               }, res=250, width = 2.5*700, height = 2.5*500)
 
-              output$tsCorGraph <- renderPlot({
-                  G <- mat2graph(metric(), m_colnames=colnames(dataset()))
-                  #plot(G, layout=layout_in_circle, vertex.size=40)
-                  plot(G, layout=layout.fruchterman.reingold, vertex.size=40, edge.arrow.size=1)
-              }, res=250, width = 3.5*700, height = 3.5*500)
+              #output$tsCorGraph <- renderPlot({
+              #    G <- mat2graph(metric(), m_colnames=colnames(dataset()))
+              #    #plot(G, layout=layout_in_circle, vertex.size=40)
+              #    plot(G, layout=layout.fruchterman.reingold, vertex.size=40, edge.arrow.size=1)
+              #}, res=250, width = 3.5*700, height = 3.5*500)
+              
+              networkWidget$server(input, output, getMatrixFunctor=(function(){
+                Q <- metric()
+                colnames(Q) <- colnames(dataset())
+                Q
+              }), is_directed=FALSE)
           }
       )
   }
@@ -103,7 +111,8 @@ correlation_controller <- function() {
               box(
                   title = "Correlation graph", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsCorGraph"))#,
+                  #plotOutput(ns("tsCorGraph"))#,
+                  networkWidget$client(ns)
                   #helpText("Edges with magnitudes in the upper quartile")
               )
           )

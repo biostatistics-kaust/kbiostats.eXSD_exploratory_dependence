@@ -67,7 +67,7 @@ spectral_estimation_ui <- function(id, title="Spectrum estimation parameters", m
 			choiceValues=choiceValues
 		),
 		if(!("param" %in% methods)) NULL else conditionalPanel(ns=ns, condition="input.lstCategorySpecEstimation == 'param' ", 
-			helpText('This methods uses the Vector Autoregressive Model to estimated the spectrum:
+			helpText('This method uses the Vector Autoregressive Model to estimated the spectrum:
 				$$
 					Y\\left(t\\right)=\\sum_{\\ell=1}^{p}\\Phi_{\\ell} X\\left(t-\\ell\\right)+\\varepsilon\\left(t\\right)
 				$$
@@ -81,8 +81,8 @@ spectral_estimation_ui <- function(id, title="Spectrum estimation parameters", m
 			radioButtons(ns("lstParamEstimation"), "Estimation method", choiceNames=c('VAR/OLS', 'LASSLE (LASSO + LSE)', 'VAR/LASSO (BigVAR package)'), choiceValues=c("RawLSE", "LASSLE", "LassoBigVAR"))
 		),
 		if(!("nonparam" %in% methods)) NULL else conditionalPanel(ns=ns, condition="input.lstCategorySpecEstimation == 'nonparam' ",
-			helpText('This methods uses smoothed versions of the Fast Fourier Transform.'),
-			radioButtons(ns("lstNonparamEstimation"), "Estimation method", choiceNames=c( "Naive smoothed FFT", "PURE method"), choiceValues=c("FFT", "PURE")),
+			helpText('This method uses smoothed versions of the Fast Fourier Transform. The PURE method was also introduced along with the Generalized shringage method (Fiecas and Ombao, 2011).'),
+			radioButtons(ns("lstNonparamEstimation"), "Estimation method", choiceNames=c("Periodogram smoother", "PURE (Plug-in unbiased risk estimation) method"), choiceValues=c("FFT", "PURE")),
 			selectInput(ns("lstNonparamWindowType"), "Window", c(
 				"Gaussian"="gausswin",
 				"Boxcar"="boxcar",
@@ -98,13 +98,13 @@ spectral_estimation_ui <- function(id, title="Spectrum estimation parameters", m
 				sliderInput(ns("numFFTSpans"), "Span:", 2, 100, 4, step=1),
 			),
 			conditionalPanel(ns=ns, condition="input.lstNonparamEstimation == 'PURE' ",
-				sliderInput(ns("numPureTrials"), "Trials:", 2, 20, 4, step=1),
+				sliderInput(ns("numPureTrials"), "Blocks:", 2, 20, 4, step=1),
 				selectInput(ns("lstPureSpans"), "Spans", DEFAULT_SPANS, selected=4, multiple=T, selectize=TRUE),
 			)
 		),
 		#		model <- general_shrinkage_estimator(data, var_lag=var_order, C_T=variance_window_C_T, n_trials=n_trials, win_spans=win_spans, win=match.fun(win))
 		if(!("semiparam" %in% methods)) NULL else conditionalPanel(ns=ns, condition="input.lstCategorySpecEstimation == 'semiparam' ",
-			helpText('This methods mixed two components: a PURE FFT estimation ans a Vector Autoregressive Model to estimated the spectrum.'),
+			helpText('This methods mixed two components: a PURE (Plug-in unbiased risk estimation) estimation and a Vector Autoregressive Model to estimated the spectrum (Fiecas and Ombao, 2011). '),
 			sliderInput(ns("txtSemiVarOrder"), "VAR order:", 1, 10, 2, step=1),
 			selectInput(ns("lstSemiWindowType"), "Window", c(
 				"Gaussian"="gausswin",
@@ -116,7 +116,7 @@ spectral_estimation_ui <- function(id, title="Spectrum estimation parameters", m
 				"Bartlett"="bartlett"
 			), selected=NULL, multiple=FALSE, selectize=TRUE),
 			sliderInput(ns("numSemiVarianceWindow"), "VarianceWindow $C_T$:", 10, 100, 11, step=1),
-			sliderInput(ns("numSemiTrials"), "Trials:", 2, 20, 4, step=1),
+			sliderInput(ns("numSemiTrials"), "Blocks:", 2, 20, 4, step=1),
 			selectInput(ns("lstSemiSpans"), "Spans", DEFAULT_SPANS, selected=4, multiple=T, selectize=TRUE),
 		)
 	)
