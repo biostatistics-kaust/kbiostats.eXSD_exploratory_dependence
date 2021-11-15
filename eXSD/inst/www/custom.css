@@ -223,3 +223,23 @@ body * {
     max-height: 85vh;
     padding-bottom: 100px;
 }
+
+.network-widget > div{
+    width: 100%!important;
+    padding: 0!important;
+}
+
+.network-widget > div > div.box{
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.network-widget > div > div.box > div.box-header{
+    display: none!important;
+}
+
+.network-widget > div > div.box *[class*=CutoffSlide]{
+    font-weight: normal;
+}
+
