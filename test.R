@@ -1,5 +1,29 @@
 source("./R_package_manager.R")
 
+#install.packages("./eXSD_0.9.tar.gz", repos = NULL, type="source")
+#library(eXSD)
+
+dataset <- load_csv_datasets(
+  path=system.file("TUH_EEG", package="eXSD"),
+  filenames=list(
+      SZ1="EEG715-seizure-01.csv",
+      BK1="EEG715-plain-01.csv"
+  ),
+  length=100
+  #length=200
+)
+dataset$SZ1 <- dataset$SZ1[,1:4]
+dataset$BK1 <- dataset$SZ1[,1:4]
+dependency.explorer(
+  dataset,
+  labels=list(
+    SZ1="Seizure (segment 1)",
+    BK1="Background (segment 1)"
+  ),
+  fs=200
+)
+
+
 dependency.explorer(
   load_csv_datasets(
     path=system.file("TUH_EEG", package="eXSD"),
