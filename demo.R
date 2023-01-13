@@ -9,6 +9,7 @@ dependency.explorer(
     ),
     length=200
   ),
+  fs=200,
   labels=list(
     SZ1="Seizure (segment 1)",
     BK1="Background (segment 1)"
