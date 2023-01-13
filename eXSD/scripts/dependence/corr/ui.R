@@ -52,7 +52,8 @@ correlation_controller <- function(fs) {
           id,
           function(input, output, session){
               metric <- reactive({correlation(dataset())})
-              output$tsPlot <- renderPlot({
+              output$tsPlot <- renderPlotly({
+                  ggplotly(
                   ggplot(
                       ts2df(dataset()),
                       aes(
@@ -63,13 +64,15 @@ correlation_controller <- function(fs) {
                       )
                   ) + geom_line(                    
                   ) +  facet_wrap(~variable, ncol=2)
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
-              output$tsCorrMatrix <- renderPlot({
+                  , width = 500, height = 100 * ncol(dataset()))
+              })#, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
+              output$tsCorrMatrix <- renderPlotly({#
                   data <- mat2df(metric())
+                  ggplotly(
                   ggplot(
                       data, 
                       aes(source, destination)
-                  ) + geom_tile(aes(fill = value)) + scale_fill_gradientn(colors = rev(brewer.pal(11, "RdBu"))) + #scale_y_discrete(limits = rev(unique(data_heatmap$Month))) +
+                  ) + geom_raster(aes(fill = value)) + #scale_fill_gradientn(colors = rev(brewer.pal(11, "RdBu"))) + #scale_y_discrete(limits = rev(unique(data_heatmap$Month))) +
                       #ggtitle("PCA") +
                       scale_y_discrete(limits = rev(unique(data$destination))) + 
                       theme(panel.grid.major = element_blank(),
@@ -77,7 +80,8 @@ correlation_controller <- function(fs) {
                               panel.border = element_blank(),
                               panel.background = element_blank(),
                               axis.text.x = element_text(angle = 90))
-              }, res=250, width = 2.5*700, height = 2.5*500)
+                  , width = 500, height = 400)
+              })#, res=250, width = 2.5*700, height = 2.5*500)
 
               #output$tsCorGraph <- renderPlot({
               #    G <- mat2graph(metric(), m_colnames=colnames(dataset()))
@@ -101,12 +105,12 @@ correlation_controller <- function(fs) {
               box(
                   title = "Input time series", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsPlot"))
+                  plotlyOutput(ns("tsPlot"))
               ),
               box(
                   title = "Correlation", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsCorrMatrix"))
+                  plotlyOutput(ns("tsCorrMatrix"))
               ),
               box(
                   title = "Correlation graph", status = "primary", solidHeader = TRUE,

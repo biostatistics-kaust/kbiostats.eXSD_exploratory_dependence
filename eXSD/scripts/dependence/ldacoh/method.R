@@ -24,6 +24,7 @@ spectrum_fft_interpolated <- function(data, number_blocks=10, block_index=0, fre
     index_out <- seq(from=1, to=nrow(S_fft_section), length.out=length_section)
     S_fft_section <- sapply(1:cols, function(i) splinefun(index_in, S_fft_section[,i])(index_out))
     colnames(S_fft_section) <- colnames(data)
+    ###print(list(S_fft_section=S_fft_section))
     S_fft_section
 }
 

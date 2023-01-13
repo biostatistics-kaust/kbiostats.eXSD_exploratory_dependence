@@ -42,8 +42,8 @@ spectral_pca_controller <- function(dataparameters) {
             win_spans=spectrum_info$spans, 
             win=spectrum_info$win)
         })
-              output$tsPlot <- renderPlot({
-                  ggplot(
+              output$tsPlot <- renderPlotly({
+                  ggplotly(ggplot(
                       ts2df(dataset()),
                       aes(
                           x=x, 
@@ -53,11 +53,12 @@ spectral_pca_controller <- function(dataparameters) {
                       )
                   ) + geom_line(              
                   ) +  facet_wrap(~variable, ncol=2)
+                  , width = 500, height = 130 * ncol(dataset()))
 
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
+              })
               
-              output$tsSpectrum <- renderPlot({
-                  ggplot(
+              output$tsSpectrum <- renderPlotly({
+                  ggplotly(ggplot(
                       spec2df(data.pca(), fs, preffix="SPEC", col="spectra"),
                       aes(
                           x=Frequency, 
@@ -67,11 +68,12 @@ spectral_pca_controller <- function(dataparameters) {
                       )
                   ) + geom_line(              
                   ) +  facet_wrap(~variable, ncol=2)
+              , width = 500, height = 130 * ncol(dataset()))
 
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
+              })
               
-              output$tsPCA <- renderPlot({
-                  ggplot(
+              output$tsPCA <- renderPlotly({
+                  ggplotly(ggplot(
                       spec2df(data.pca(), fs, preffix="PC", col="PCs"),
                       aes(
                           x=Frequency, 
@@ -81,8 +83,9 @@ spectral_pca_controller <- function(dataparameters) {
                       )
                   ) + geom_line(              
                   ) +  facet_wrap(~variable, ncol=2)
+                  , width = 500, height = 130 * ncol(dataset()) )
 
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
+              })
               
         # Biplot isn't defined for SPCA
               #output$PCs <- renderPlot({
@@ -113,19 +116,19 @@ spectral_pca_controller <- function(dataparameters) {
               box(
                   title = "Input time series", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsPlot"))
+                  plotlyOutput(ns("tsPlot"))
               ),
         box(
                   title = "SPCA factors", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsPCA"))
+                  plotlyOutput(ns("tsPCA"))
               )
           ),
           fluidRow(
               box(
                   title = "Input spectrum", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsSpectrum"))
+                  plotlyOutput(ns("tsSpectrum"))
               )
           )
       )

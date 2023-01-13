@@ -89,10 +89,10 @@ partial_directed_coherence_controller <- function(dataparameters) {
           selectInput(session$ns("txtDst"), "Destination channel B:", choices=choice_values, selected=2)
               })
               
-              output$tsCoh <- renderPlot({
+              output$tsCoh <- renderPlotly({
                   i <- as.integer(input$txtSrc)
                   j <- as.integer(input$txtDst)
-                  ggplot(
+                  ggplotly(ggplot(
                       data.frame(
                           frequencies=metric()$freqs * fs,
                           partial_directed_coherence=get_marginal_coh(metric()$coh, i, j)
@@ -102,13 +102,14 @@ partial_directed_coherence_controller <- function(dataparameters) {
                           y=partial_directed_coherence
                       )
                   ) + geom_line()
+                  , width = 500, height = 300)
 
-              }, res=250, width = 2.5*750, height = 2.5*300)
+              })
 
-              output$tsCohMatrix <- renderPlot({
+              output$tsCohMatrix <- renderPlotly({
                   idx <- as.integer(ceiling(input$txtFrequency / fs * number_freq_points)) + 1
                   data <- mat2df(metric()$coh[[idx]], m_colnames=colnames(dataset()))
-                  ggplot(
+                  ggplotly(ggplot(
                       data, 
                       aes(source, destination)
                   ) + geom_tile(aes(fill = value)) + #scale_fill_gradientn(colors = rev(brewer.pal(11, "RdBu"))) + #scale_y_discrete(limits = rev(unique(data_heatmap$Month))) +
@@ -122,7 +123,8 @@ partial_directed_coherence_controller <- function(dataparameters) {
                               panel.border = element_blank(),
                               panel.background = element_blank(),
                               axis.text.x = element_text(angle = 90))
-              }, res=250, width = 2.5*700, height = 2.5*500)
+                  , width = 500, height = 400)
+              })
 
               #output$tsPlot <- renderPlot({
               #    i <- as.integer(input$txtSrc)
@@ -195,7 +197,7 @@ partial_directed_coherence_controller <- function(dataparameters) {
                   #sliderInput(ns("txtSrc"), "Input channel:", 1, 10, 0, step=1),
                   #sliderInput(ns("txtDst"), "Output channel:", 1, 10, 0, step=1),
                   #textInput(ns("text"), "Text input:")
-                  plotOutput(ns("tsCoh")),
+                  plotlyOutput(ns("tsCoh")),
                   #helpText("Channels:"),
                   #plotOutput(ns("tsPlot")),
               ),
@@ -203,7 +205,7 @@ partial_directed_coherence_controller <- function(dataparameters) {
                   title = "PDC matrix", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
                   sliderInput(ns("txtFrequency"), "Frequency:", 0, 0.5*fs, 0, step=0.01),
-                  plotOutput(ns("tsCohMatrix"))
+                  plotlyOutput(ns("tsCohMatrix"))
               ),
               box(
                   title = "PDC graph", status = "primary", solidHeader = TRUE,
