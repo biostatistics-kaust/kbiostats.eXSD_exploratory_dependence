@@ -18,8 +18,8 @@ pca_controller <- function(dataparameters) {
           id,
           function(input, output, session){
               data.pca <- reactive({PCA(dataset())})
-              output$tsPlot <- renderPlot({
-                  ggplot(
+              output$tsPlot <- renderPlotly({
+                  ggplotly(ggplot(
                       ts2df(dataset()),
                       aes(
                           x=x, 
@@ -29,10 +29,11 @@ pca_controller <- function(dataparameters) {
                       )
                   ) + geom_line(              
                   ) +  facet_wrap(~variable, ncol=2)
+                  , width = 500, height = 130 * ncol(dataset()) )
 
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
-              output$tsPCA <- renderPlot({
-                  ggplot(
+              })
+              output$tsPCA <- renderPlotly({
+                  ggplotly(ggplot(
                       ts2df(data.pca()$x, preffix="PC"),
                       aes(
                           x=x, 
@@ -42,9 +43,11 @@ pca_controller <- function(dataparameters) {
                       )
                   ) + geom_line(              
                   ) +  facet_wrap(~variable, ncol=2)
+                  , width = 500, height = 130 * ncol(dataset()) )
 
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
-              output$PCs <- renderPlot({
+              })
+              output$PCs <- renderPlotly({
+              ggplotly(
                   ggbiplot(data.pca(),
                       obs.scale = 1, 
                       var.scale=1,
@@ -54,7 +57,8 @@ pca_controller <- function(dataparameters) {
                       var.axes=T,
                       #groups=iris$Species, #no need for coloring, I'm making the points invisible
                       alpha=0)
-              }, res=250, width = 2.5*700, height = 2.5*500)
+                  , width = 500, height = 400)
+              })
           }
       )
   }
@@ -66,19 +70,19 @@ pca_controller <- function(dataparameters) {
               box(
                   title = "Principal components (2)", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("PCs"))
+                  plotlyOutput(ns("PCs"))
               )
           ),
           fluidRow(
               box(
                   title = "Input time series", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsPlot"))
+                  plotlyOutput(ns("tsPlot"))
               ),
               box(
                   title = "PCA", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsPCA"))
+                  plotlyOutput(ns("tsPCA"))
               )
           )
       )

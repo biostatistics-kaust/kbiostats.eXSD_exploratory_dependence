@@ -76,8 +76,8 @@ lagged_dualfreq_coherence_controller <- function(dataparameters) {
                   )
               })
               #
-              output$tsSpectrum1 <- renderPlot({
-                  ggplot(
+              output$tsSpectrum1 <- renderPlotly({
+                  ggplotly(ggplot(
                       spec2df(data.ldac(), preffix="SPEC", col="spectrum1"),
                       aes(
                           x=w, 
@@ -87,11 +87,12 @@ lagged_dualfreq_coherence_controller <- function(dataparameters) {
                       )
                   ) + geom_line(              
                   ) +  facet_wrap(~variable, ncol=2)
+                  , width = 2.5*750, height = 2.5*130 * ncol(dataset()) )
 
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
+              })
               #
-              output$tsSpectrum2 <- renderPlot({
-                  ggplot(
+              output$tsSpectrum2 <- renderPlotly({
+                  ggplotly(ggplot(
                       spec2df(data.ldac(), preffix="SPEC", col="spectrum2"),
                       aes(
                           x=w, 
@@ -101,12 +102,14 @@ lagged_dualfreq_coherence_controller <- function(dataparameters) {
                       )
                   ) + geom_line(              
                   ) +  facet_wrap(~variable, ncol=2)
+                  , width = 2.5*750, height = 2.5*130 * ncol(dataset()))
 
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
+              })
               #
-              output$tsCohMatrix <- renderPlot({
+              output$tsCohMatrix <- renderPlotly({
                   idx <- as.integer(ceiling(input$txtFrequency *number_freq_points)) + 1
                   data <- mat2df(data.ldac()$coh, m_colnames=colnames(dataset()))
+                  ggplotly(
                   ggplot(
                       data, 
                       aes(source, destination)
@@ -119,7 +122,8 @@ lagged_dualfreq_coherence_controller <- function(dataparameters) {
                               panel.border = element_blank(),
                               panel.background = element_blank(),
                               axis.text.x = element_text(angle = 90))
-              }, res=250, width = 2.5*700, height = 2.5*500)
+                  , width = 500, height = 400)
+              })
               
               #utput$tsCohGraph <- renderPlot({
               #    G <- mat2graph(data.ldac()$coh, m_colnames=colnames(dataset()))
@@ -161,7 +165,7 @@ lagged_dualfreq_coherence_controller <- function(dataparameters) {
               box(
                   title = "Bivariate coherence", status = "primary", solidHeader = TRUE, width=6,
                   collapsible = TRUE,
-                  plotOutput(ns("tsCohMatrix"))
+                  plotlyOutput(ns("tsCohMatrix"))
               ),
 
               

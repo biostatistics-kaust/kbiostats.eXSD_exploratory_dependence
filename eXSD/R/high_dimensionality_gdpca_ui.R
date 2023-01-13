@@ -32,8 +32,8 @@ generalized_dynamic_pca_controller <- function(dataparameters) {
           id,
           function(input, output, session){
               data.pca <- reactive({generalized_dynamic_pca(dataset())})
-              output$tsPlot <- renderPlot({
-                  ggplot(
+              output$tsPlot <- renderPlotly({
+                  ggplotly(ggplot(
                       ts2df(dataset()),
                       aes(
                           x=x, 
@@ -43,11 +43,12 @@ generalized_dynamic_pca_controller <- function(dataparameters) {
                       )
                   ) + geom_line(              
                   ) +  facet_wrap(~variable, ncol=2)
+                  , width = 500, height = 130 * ncol(dataset()))
 
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
+              })
               
-              output$tsSpectrum <- renderPlot({
-                  ggplot(
+              output$tsSpectrum <- renderPlotly({
+                  ggplotly(ggplot(
                       spec2df(data.pca(), preffix="TS", col="time_series"),
                       aes(
                           x=t, 
@@ -57,10 +58,13 @@ generalized_dynamic_pca_controller <- function(dataparameters) {
                       )
                   ) + geom_line(              
                   ) +  facet_wrap(~variable, ncol=2)
+                  , width = 500, height = 130 * ncol(dataset()) )
 
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(dataset()))
+              })
               
-              output$tsPCA <- renderPlot({
+              output$tsPCA <- renderPlotly({
+              print(list(width = 500, height = (data.pca()$PCs) ))
+                  ggplotly(
                   ggplot(
                       spec2df(data.pca(), preffix="PC", col="PCs"),
                       aes(
@@ -70,11 +74,12 @@ generalized_dynamic_pca_controller <- function(dataparameters) {
                           group=variable
                       )
                   ) + geom_line(              
-                  ) +  facet_wrap(~variable, ncol=2)
-
-              }, res=250, width = 2.5*750, height = 2.5*130 * ncol(data.pca()$PCs))
+                  ) + facet_wrap(~variable, ncol=2)
+                  , width = 500, height = 180 * ncol(data.pca()$PCs) )
+              })
               
-              output$PCs <- renderPlot({
+              output$PCs <- renderPlotly({
+              ggplotly(
                   ggbiplot(data.pca()$pca,
                       obs.scale = 1, 
                       var.scale=1,
@@ -84,7 +89,8 @@ generalized_dynamic_pca_controller <- function(dataparameters) {
                       var.axes=T,
                       #groups=iris$Species, #no need for coloring, I'm making the points invisible
                       alpha=0)
-              }, res=250, width = 2.5*700, height = 2.5*500)
+                      , width = 500, height = 400)
+              })
           }
       )
   }
@@ -96,19 +102,19 @@ generalized_dynamic_pca_controller <- function(dataparameters) {
               box(
                   title = "Principal components (2)", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("PCs"))
+                  plotlyOutput(ns("PCs"))
               )
           ),
           fluidRow(
               box(
                   title = "Input time series", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsPlot"))
+                  plotlyOutput(ns("tsPlot"))
               ),
               box(
                   title = "PCA", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
-                  plotOutput(ns("tsPCA"))
+                  plotlyOutput(ns("tsPCA"))
               )
           )
       )
